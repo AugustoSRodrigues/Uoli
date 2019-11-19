@@ -64,6 +64,7 @@ set_head_servo:
     beq a0, t1, set_mid
     beq a0, t2, set_top
 
+    #Erro no ID
     li a0, -1
     ret
 
@@ -71,18 +72,30 @@ set_head_servo:
     set_base:
         li t0, 0
         li t1, 157
+        j check_angle
+        
+    set_mid:
+        li t0, 52
+        li t1, 91
+        j check_angle
+    
+    set_top
+        li t0, 16
+        li t1, 117
+        j check_angle
 
+    check_angle:
         blt a1, t0, fail_angle
         bge a1, t1, fail_angle
         li a7, 17
         ecall
+        li a0, 0
+        ret
 
-    set_mid:
-        li t0, 52
-        li t1, 91
-
-        blt a1, t0, fail_angle
-        bge a1, t1, fail_angle
+    #Angulo fora do intervalo
+    fail_angle:
+        li a0, -2
+       
 
 
 
@@ -90,24 +103,29 @@ set_head_servo:
 
 #IMPLEMENTATION SENSORS
 get_us_distance:
+    
+
+
 get_current_GPS_position:
+    li a7, 19
+    ecall 
 
 get_gyro_angles:
+    li a7, 20
+    ecall
 
 # IMPLEMENTATION TIMER
 get_time:
     li a7, 21
     ecall
-    
-    la t0, time_system
-    lw t1, 0(t0)
-    sw t1, 0(a0)
-    ret
+    ret 
 
 set_time:
-    la t0, time_system
-    sw a0, 0(t0)
-    ret
+   #la t0, time_system
+    #sw a0, 0(t0)
+    #ret
+    li a7, 22
+    ecall
 
 #IMPLEMENTATION UART
 puts:
