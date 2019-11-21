@@ -21,14 +21,36 @@ int_handler:
   ###### Tratador de interrupÃ§Ãµes e syscalls ######
   
   # <= Implemente o tratamento da sua syscall aqui
+  li t0, 16
+  beq a7, t0, read_ultrasonic_sensor
+  li t0, 17 
+  beq a7, t0, set_servo_angles
   li t0, 18
   beq a7, t0, set_engine_torque
+  li t0, 19
+  beq a7, t0, read_gps
+  li t0, 20
+  beq a7, t0, read_gyroscope
+  li t0, 21
+  beq a7, t0, get_time
+  li t0, 22
+  beq a7, t0, set_time
+  li t0, 64 
+  beq a7, t0, write
+ 
+  
+
 
 
   set_engine_torque:
     li t0, 0
     beq a0, t0, set_torque_esq
-    j set_torque_dir
+    li t0, 1
+    beq a0, t0, set_torque_dir
+    
+    #ID invalido
+    li a0, -1
+    ret
 
     set_torque_esq:
       li t0, TORQUE_M2
@@ -85,6 +107,6 @@ li t2, ~0x1800 # do registrador mstatus
 and t1, t1, t2 # com o valor 00
 csrw mstatus, t1
 
-la t0, user # Grava o endereço do rótulo user
+la t0, main # Grava o endereço do rótulo user
 csrw mepc, t0 # no registrador mepc
 mret # PC <= MEPC; MIE <= MPIE; Muda modo para MPP
