@@ -19,7 +19,48 @@
 
 int_handler:
   ###### Tratador de interrupÃ§Ãµes e syscalls ######
+  la a6, salvador_de_registradores
+  csrrw a6, mscratch, a7 # troca valor de a0 com mscratch
+  sw a1, 0(a6) # salva a1 
+  sw a2, 4(a6) # salva a2 
+  sw a3, 8(a6) # salva a3 
+  sw a4, 12(a6) # salva a4
+  sw a1, 0(a0) # salva a1 
+  sw a2, 4(a0) # salva a2 
+  sw a3, 8(a0) # salva a3 
+  sw a4, 12(a0) # salva a4
+  sw a1, 0(a0) # salva a1 
+  sw a2, 4(a0) # salva a2 
+  sw a3, 8(a0) # salva a3 
+  sw a4, 12(a0) # salva a4
+  sw a1, 0(a0) # salva a1 
+  sw a2, 4(a0) # salva a2 
+  sw a3, 8(a0) # salva a3 
+  sw a4, 12(a0) # salva a4
+  sw a1, 0(a0) # salva a1 
+  sw a2, 4(a0) # salva a2 
+  sw a3, 8(a0) # salva a3 
+  sw a4, 12(a0) # salva a4
+  sw a1, 0(a0) # salva a1 
+  sw a2, 4(a0) # salva a2 
+  sw a3, 8(a0) # salva a3 
+  sw a4, 12(a0) # salva a4
+  sw a1, 0(a0) # salva a1 
+  sw a2, 4(a0) # salva a2 
+  sw a3, 8(a0) # salva a3 
+  sw a4, 12(a0) # salva a4
+  sw a1, 0(a0) # salva a1 
+  sw a2, 4(a0) # salva a2 
+  sw a3, 8(a0) # salva a3 
+  sw a4, 12(a0) # salva a4
+
+salvador_de_registradores:.skip 124
+
   
+
+
+
+
   # <= Implemente o tratamento da sua syscall aqui
   li t0, 16
   beq a7, t0, read_ultrasonic_sensor
