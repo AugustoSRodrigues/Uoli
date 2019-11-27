@@ -42,6 +42,18 @@ int_handler:
 
 
 
+  read_ultrasonic_sensor:
+    li t0,READY_SENSOR
+    beq t0, zero, read_ultrasonic_sensor
+
+    li t0 OBJECT_NEAR
+    lw a0, 0(t0)
+    ret
+    
+
+
+
+
   set_engine_torque:
     li t0, 0
     beq a0, t0, set_torque_esq
@@ -63,6 +75,50 @@ int_handler:
     cont:
       sh a1, 0(t0)
       ret
+
+  read_gps:
+      li t0, READY_POS_ROT
+      li t1, 1
+      beq t0, t1, leitura_pos
+      #<=oq fazer se READ_POS_ROT = 0?
+
+
+      leitura_pos:
+      li t0, POS_X
+      li t1, POS_Y
+      li t2, POS_Z
+
+      sw t0, 0(a0)
+      sw t1, 4(a0)
+      sw t2, 8(a0)
+
+      ret
+
+  read_gyroscope:
+     li t0, READY_POS_ROT
+      li t1, 1
+      beq t0, t1, leitura_angle
+      #<=oq fazer se READ_POS_ROT = 0?
+
+
+      leitura_angle:
+      li t0, Angle_Euler
+      
+      sw t0, 0(a0)
+      
+
+      ret
+
+  get_time:
+    li t0, INTERRUPTION_GPT_VALUE
+    lb a0, 0(t0)
+    ret
+
+  set_time:
+    li t0, INTERRUPTION_GPT_VALUE
+    sb a0, 0(t0)
+    ret
+
 
 
 
