@@ -20,10 +20,6 @@
 # UART
 .globl puts
 
-#Vector 3 contém as coordenadas do Uoli
-Vector3: .skip 12
-
-
 ################################################
 # IMPLEMENTATION ENGINES
 set_torque:
@@ -40,22 +36,22 @@ set_torque:
     li a7, 18
     
     #Armazena os valores dos torques para fazer a syscall
-    mov t0, a0
-    mov t1, a1
+    mv t0, a0
+    mv t1, a1
 
     #Set torque esq
     li a0, 0
-    mov a1, t0
+    mv  t0, t1 # t0 = t1 a1, t0
     ecall
 
     #Set torque dir
     li a0, 1
-    mov a1, t1
+    mv  t0, t1 # t0 = t1 a1, t1
     ecall
     ret
 
     fail:
-        li a0 -1
+        li a0, -1
         ret
 
 ################################################
@@ -79,7 +75,7 @@ set_engine_torque:
     
     #Fora do intervalo permitido
     fail_torque:
-        li a0 -1
+        li a0, -1
         ret
     
     #Erro no ID
@@ -101,7 +97,6 @@ set_head_servo:
     li a0, -1
     ret
 
-    
     set_base:
         li t0, 0
         li t1, 157
@@ -136,29 +131,15 @@ get_us_distance:
     li a7, 16
     ecall
     ret
-    #Pede para que inicie a leitura do sensor
-    #sw t0, 0(READY_SENSOR)
-    #li a0, READY_SENSOR
-    #beq a0, 1, read 
-
-    #read:
-    #li a0, OBJECT_NEAR
-    
-    #Verifica a leitura do sensor
-    #li t0, -1 
-    
-    ##Se for -1, não há objetos no sensor
-    #beq t0, a0, value
-    
-    #ret
     
     no_objects:
-        mov a0, t1
+        mv  t0, t1 
         ret
 ################################################
 get_current_GPS_position:
-    li a7, 
-ret
+    li a7, 19
+    ecall 
+    ret
 ################################################
 get_gyro_angles:
     li a7, 20
@@ -171,11 +152,9 @@ get_time:
     ret 
 ################################################
 set_time:
-   #la t0, time_system
-    #sw a0, 0(t0)
-    #ret
     li a7, 22
     ecall
+    ret
 
 #IMPLEMENTATION UART
 puts:
