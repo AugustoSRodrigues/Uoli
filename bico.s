@@ -20,12 +20,45 @@
 # UART
 .globl puts
 
+#Vector 3 contém as coordenadas do Uoli
+Vector3: .skip 12
 
+
+################################################
 # IMPLEMENTATION ENGINES
 set_torque:
-
+    #Recebe como paramêtro, torques para motor1 e motor2 respectivamente
+    li t1, 101
+    li t2,-100
+    #Verifica se os dois torques estão dentro do intervalo
+    bge a0, t1, fail
+    blt a0, t2, fail
+    bge a1, t1, fail
+    blt a1, t2, fail
     
+    #Carrega em a7 set_engine_torque
+    li a7, 18
+    
+    #Armazena os valores dos torques para fazer a syscall
+    mov t0, a0
+    mov t1, a1
 
+    #Set torque esq
+    li a0, 0
+    mov a1, t0
+    ecall
+
+    #Set torque dir
+    li a0, 1
+    mov a1, t1
+    ecall
+    ret
+
+    fail:
+        li a0 -1
+        ret
+
+################################################
 set_engine_torque:
     li t1, 101
     li t2,-100
@@ -40,11 +73,11 @@ set_engine_torque:
     li a7, 18
     ecall
 
-    #ele setou os torques
+    #Setou os torques
     li a0, 0
     ret
     
-    #erro no torque
+    #Fora do intervalo permitido
     fail_torque:
         li a0 -1
         ret
@@ -54,7 +87,7 @@ set_engine_torque:
         li a0, -2
         ret
 
-
+################################################
 set_head_servo:
     li t0, 0
     li t1, 1
@@ -79,7 +112,7 @@ set_head_servo:
         li t1, 91
         j check_angle
     
-    set_top
+    set_top:
         li t0, 16
         li t1, 117
         j check_angle
@@ -95,31 +128,48 @@ set_head_servo:
     #Angulo fora do intervalo
     fail_angle:
         li a0, -2
-       
-
-
-
-
+    
+################################################
 
 #IMPLEMENTATION SENSORS
 get_us_distance:
+    li a7, 16
+    ecall
+    ret
+    #Pede para que inicie a leitura do sensor
+    #sw t0, 0(READY_SENSOR)
+    #li a0, READY_SENSOR
+    #beq a0, 1, read 
+
+    #read:
+    #li a0, OBJECT_NEAR
     
-
-
+    #Verifica a leitura do sensor
+    #li t0, -1 
+    
+    ##Se for -1, não há objetos no sensor
+    #beq t0, a0, value
+    
+    #ret
+    
+    no_objects:
+        mov a0, t1
+        ret
+################################################
 get_current_GPS_position:
-    li a7, 19
-    ecall 
-
+    li a7, 
+ret
+################################################
 get_gyro_angles:
     li a7, 20
     ecall
-
+################################################
 # IMPLEMENTATION TIMER
 get_time:
     li a7, 21
     ecall
     ret 
-
+################################################
 set_time:
    #la t0, time_system
     #sw a0, 0(t0)
@@ -129,3 +179,6 @@ set_time:
 
 #IMPLEMENTATION UART
 puts:
+    li a7, 64
+    ecall
+    ret

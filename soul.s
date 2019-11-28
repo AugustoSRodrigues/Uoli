@@ -54,7 +54,22 @@ int_handler:
   sw a3, 8(a0) # salva a3 
   sw a4, 12(a0) # salva a4
 
-salvador_de_registradores:.skip 124
+  salvador_de_registradores:.skip 124
+
+  
+  # decodifica a causa da interrupção
+  csrr a1, mcause # lê a causa da exceção
+  bgez a1, exception # desvia se não for uma interrupção
+
+  #verifica se e uma interropcao falsa
+  li t0, INTERRUPTION_GPT
+  beq t0, zero, tratado_gpt; # if t0 =zero then trata_gpt
+  ret
+
+
+  tratado_gpt:
+  sb zero, 0(t0)
+  ret
 
   
 
@@ -62,6 +77,7 @@ salvador_de_registradores:.skip 124
 
 
   # <= Implemente o tratamento da sua syscall aqui
+  exception:
   li t0, 16
   beq a7, t0, read_ultrasonic_sensor
   li t0, 17 
@@ -91,6 +107,47 @@ salvador_de_registradores:.skip 124
     lw a0, 0(t0)
     ret
     
+  set_servo_angles:
+    li t0, 0
+    li t1, 1
+    li t2, 2
+
+    beq a0, t0, set_base
+    beq a0, t1, set_mid
+    beq a0, t2, set_top
+    #Erro no ID
+    li a0, -2
+    ret
+
+    set_base:
+        li t0, 0
+        li t1, 157
+        j check_angle
+        
+    set_mid:
+        li t0, 52
+        li t1, 91
+        j check_angle
+    
+    set_top
+        li t0, 16
+        li t1, 117
+        j check_angle
+
+    check_angle:
+        blt a1, t0, fail_angle
+        bge a1, t1, fail_angle
+        li a7, 17
+        ecall
+        li a0, 0
+        ret
+
+    fail_angle:
+        li a0, -1
+        ret
+
+
+
 
 
 
@@ -120,11 +177,8 @@ salvador_de_registradores:.skip 124
   read_gps:
       li t0, READY_POS_ROT
       li t1, 1
-      beq t0, t1, leitura_pos
-      #<=oq fazer se READ_POS_ROT = 0?
-
-
-      leitura_pos:
+      bne t0, t1, read_gps
+      
       li t0, POS_X
       li t1, POS_Y
       li t2, POS_Z
@@ -138,11 +192,10 @@ salvador_de_registradores:.skip 124
   read_gyroscope:
      li t0, READY_POS_ROT
       li t1, 1
-      beq t0, t1, leitura_angle
-      #<=oq fazer se READ_POS_ROT = 0?
+      bne t0, t1, read_gyroscope
 
 
-      leitura_angle:
+      
       li t0, Angle_Euler
       
       sw t0, 0(a0)
@@ -159,7 +212,9 @@ salvador_de_registradores:.skip 124
     li t0, INTERRUPTION_GPT_VALUE
     sb a0, 0(t0)
     ret
-
+  
+  //write:
+    
 
 
 
@@ -177,6 +232,30 @@ salvador_de_registradores:.skip 124
 _start:
 
 #<=configuracao inicial aqui
+#Configuracao dos servomotores do pescoco
+li t0, ANGLE_TOP
+li t1, 78
+sb t1, 0(t0)
+li t0, ANGLE_MID
+li t1, 80
+sb t1, 0(t0)
+li t0, ANGLE_BASE
+li t1, 31
+sb t1, 0(t0)
+
+#Configuracao do GPT
+li t0, INTERRUPTION_GPT_VALUE
+li t1, 100
+sw t1, 0(t0)
+
+#configiracao do torque 
+li t0, TORQUE_M1
+sh zero, 0(t0)
+li t0, TORQUE_M2
+sh zero, 0(t0)
+
+
+la sp, pilha_usuario
 
 
 # Configura o tratador de interrupções
@@ -207,3 +286,10 @@ csrw mstatus, t1
 la t0, main # Grava o endereço do rótulo user
 csrw mepc, t0 # no registrador mepc
 mret # PC <= MEPC; MIE <= MPIE; Muda modo para MPP
+
+
+salvador_de_registradores:
+  .skip 124
+pilha_usuario:
+  .skip 124
+UART:
